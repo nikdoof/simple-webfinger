@@ -1,0 +1,2 @@
+domain: doofnet.uk
+oidc_href: https://id.doofnet.uk/application/o/tailscale/.well-known/openid-configuration
