@@ -2,7 +2,7 @@
 
 A simple, Flask-based webfinger handler.
 
-Simple Webfinger was created to provide an ODIC href from a basic YAML configuration file. Ideally to use with Tailscale and Authentik.
+Simple Webfinger was created to provide an OIDC href from a basic YAML configuration file. Ideally to use with Tailscale and Authentik.
 
 ## Configuration
 
