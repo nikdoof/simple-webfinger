@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from flask import Flask, request, abort
 import yaml
 
@@ -7,19 +9,57 @@ with open('config.yaml', 'rb') as fobj:
     data = yaml.load(fobj, yaml.SafeLoader)
 
 
+def get_account_links(user):
+    links = []
+    account_data = data['accounts'][user]
+
+    # Append custom links
+    if 'links' in account_data:
+        links.extend(account_data['links'])
+
+    if 'mastodon' in account_data:
+        account, domain = account_data['mastodon'].split('@')
+        links.extend([
+            {'rel': 'http://webfinger.net/rel/profile-page', 'type': 'text/html', 'href': 'https://{0}/@{1}'.format(domain, account)},
+            {'rel': 'self', 'type': 'application/activity+json', 'href': 'https://{0}/users/{1}'.format(domain, account)},
+            {'rel': 'http://ostatus.org/schema/1.0/subscribe', 'template': "https://{0}/authorize_interaction?uri={{uri}}".format(domain)}
+        ])
+
+    # Append the OIDC link
+    if 'oidc_href' in data:
+        links.append({
+            'rel': 'http://openid.net/specs/connect/1.0/issuer',
+            'href': data['oidc_href'],
+        })
+
+    return links
+
+
+def filter_links(links, rel):
+    new_links = []
+    for link in links:
+        if link['rel'] == rel:
+            new_links.append(link)
+    return new_links
+
+
 @app.route("/.well-known/webfinger")
 def webfinger():
     resource = request.args.get('resource')
+    account, domain = urlparse(resource).path.split('@')
 
-    if resource.split('@')[1] != data['domain']:
+    if domain != data['domain'] or account not in data['accounts']:
         abort(404)
+
+    links = get_account_links(account)
+
+    rel = request.args.get('rel')
+    if rel:
+        links = filter_links(links, rel)
 
     return {
         'subject': resource,
-        'links': [{
-            'rel': "http://openid.net/specs/connect/1.0/issuer",
-            'href': data['oidc_href'],
-        }]
+        'links': links
     }
 
 
