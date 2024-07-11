@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.8
+# syntax=docker/dockerfile:1.9
 FROM --platform=$BUILDPLATFORM python:3.12-alpine
 
 WORKDIR /app
