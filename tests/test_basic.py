@@ -1,3 +1,5 @@
+from simple_webfinger.models.webfinger import JSONResourceDefinition
+
 def test_index_route(client):
     """
     Check that the index route is 404
@@ -21,6 +23,7 @@ def test_domain(app, client):
     """
     response = client.get("/.well-known/webfinger?resource=acct:nikdoof@doofnet.uk")
     assert response.status_code == 200
+    assert JSONResourceDefinition.model_validate_json(response.text)
 
 
 def test_invalid_domain(app, client):
@@ -31,14 +34,15 @@ def test_invalid_domain(app, client):
     assert response.status_code == 404
 
 
-def test_invalid_user(app, client):
+def test_empty_config_user(app, client):
     """
     Check a basic user (no extra config in the config file) results in a 200
     """
     response = client.get("/.well-known/webfinger?resource=acct:testaccount@doofnet.uk")
     assert response.status_code == 200
+    assert JSONResourceDefinition.model_validate_json(response.text)
 
-def test_empty_user(app, client):
+def test_invalid_user(app, client):
     """
     Check a invalid user results in a 404
     """
@@ -58,6 +62,7 @@ def test_rel_filtering(client):
     """
     response = client.get("/.well-known/webfinger?resource=acct:nikdoof@doofnet.uk&rel=self")
     assert response.status_code == 200
+    assert JSONResourceDefinition.model_validate_json(response.text)
 
     assert len(response.json['links'])
     for link in response.json['links']:
@@ -75,6 +80,7 @@ def test_multiple_rel_filtering(client):
 
     response = client.get("/.well-known/webfinger", query_string=params)
     assert response.status_code == 200
+    assert JSONResourceDefinition.model_validate_json(response.text)
 
     assert len(response.json['links']) > 1
     for link in response.json['links']:
