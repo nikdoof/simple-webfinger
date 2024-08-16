@@ -46,13 +46,21 @@ def filter_links(links, rel):
 @app.route("/.well-known/webfinger")
 def webfinger():
     resource = request.args.get('resource')
+
+    # No resource requested, so return a HTTP 400
+    if not resource:
+        abort(400)
+
     account, domain = urlparse(resource).path.split('@')
 
+    # If the request is not for the correct domain, or for an account that doesn't exist, return 404
     if domain != data['domain'] or account not in data['accounts']:
         abort(404)
 
     links = get_account_links(account)
 
+    # If we have a 'rel' value on the request, filter down to the requested rel
+    # https://datatracker.ietf.org/doc/html/rfc7033#section-4.3
     rel = request.args.get('rel')
     if rel:
         links = filter_links(links, rel)
