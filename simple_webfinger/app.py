@@ -1,40 +1,13 @@
 from urllib.parse import urlparse
 
 import yaml
-import json
 from flask import Flask, abort, request
+from simple_webfinger.models.webfinger import JSONResourceDefinition
 
 
 def get_account_links(user: str, data: dict) -> list:
     links = []
     account_data = data["accounts"][user]
-
-    # Append custom links
-    if "links" in account_data:
-        links.extend(account_data["links"])
-
-    if "mastodon" in account_data:
-        account, domain = account_data["mastodon"].split("@")
-        links.extend(
-            [
-                {
-                    "rel": "http://webfinger.net/rel/profile-page",
-                    "type": "text/html",
-                    "href": "https://{0}/@{1}".format(domain, account),
-                },
-                {
-                    "rel": "self",
-                    "type": "application/activity+json",
-                    "href": "https://{0}/users/{1}".format(domain, account),
-                },
-                {
-                    "rel": "http://ostatus.org/schema/1.0/subscribe",
-                    "template": "https://{0}/authorize_interaction?uri={{uri}}".format(
-                        domain
-                    ),
-                },
-            ]
-        )
 
     # Append the OIDC link
     if "oidc_href" in data:
@@ -44,6 +17,34 @@ def get_account_links(user: str, data: dict) -> list:
                 "href": data["oidc_href"],
             }
         )
+
+    # Append custom links
+    if account_data:
+        if "links" in account_data:
+            links.extend(account_data["links"])
+
+        if "mastodon" in account_data:
+            account, domain = account_data["mastodon"].split("@")
+            links.extend(
+                [
+                    {
+                        "rel": "http://webfinger.net/rel/profile-page",
+                        "type": "text/html",
+                        "href": "https://{0}/@{1}".format(domain, account),
+                    },
+                    {
+                        "rel": "self",
+                        "type": "application/activity+json",
+                        "href": "https://{0}/users/{1}".format(domain, account),
+                    },
+                    {
+                        "rel": "http://ostatus.org/schema/1.0/subscribe",
+                        "template": "https://{0}/authorize_interaction?uri={{uri}}".format(
+                            domain
+                        ),
+                    },
+                ]
+            )
 
     return links
 
@@ -103,17 +104,20 @@ def create_app(config={}):
 
             # If we have a 'rel' value on the request, filter down to the requested rel
             # https://datatracker.ietf.org/doc/html/rfc7033#section-4.3
-            print(request.args)
             rel = request.args.getlist("rel")
             if rel:
                 links = filter_links(links, rel)
 
             response = {"subject": resource, "links": links}
-            if "properties" in account_data and len(account_data['properties']):
+            
+            # Add properties if defined in the config
+            if account_data and "properties" in account_data and len(account_data["properties"]):
                 response.update({"properties": account_data["properties"]})
 
             return app.response_class(
-                response=json.dumps(response),
+                response=JSONResourceDefinition(**response).model_dump_json(
+                    exclude_none=True
+                ),
                 status=200,
                 mimetype="application/jrd+json",
             )

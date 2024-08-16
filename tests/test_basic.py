@@ -33,6 +33,13 @@ def test_invalid_domain(app, client):
 
 def test_invalid_user(app, client):
     """
+    Check a basic user (no extra config in the config file) results in a 200
+    """
+    response = client.get("/.well-known/webfinger?resource=acct:testaccount@doofnet.uk")
+    assert response.status_code == 200
+
+def test_empty_user(app, client):
+    """
     Check a invalid user results in a 404
     """
     response = client.get("/.well-known/webfinger?resource=acct:nikxxxdoof@doofnet.uk")
