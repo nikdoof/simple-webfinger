@@ -16,14 +16,14 @@ ENV PYTHONFAULTHANDLER=1 \
   POETRY_VERSION=1.7.1
 
 # System deps:
-RUN apk add build-base unzip wget python3-dev libffi-dev
+RUN apk add build-base unzip wget python3-dev libffi-dev rust
 RUN pip install "poetry==$POETRY_VERSION"
 
 WORKDIR /src
 
 # Generate requirements and install *all* dependencies.
 COPY pyproject.toml poetry.lock /src/
-RUN poetry export --dev --without-hashes --no-interaction --no-ansi -f requirements.txt -o requirements.txt
+RUN poetry export --without-hashes --no-interaction --no-ansi -f requirements.txt -o requirements.txt
 RUN pip install --prefix=/runtime --force-reinstall -r requirements.txt
 
 FROM base AS runtime
