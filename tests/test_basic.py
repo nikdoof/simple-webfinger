@@ -44,3 +44,31 @@ def test_invalid_user_request(app, client):
     """
     response = client.get("/.well-known/webfinger?resource=nikdoof@doofnet.uk")
     assert response.status_code == 404
+
+def test_rel_filtering(client):
+    """
+    Check that filtering links by rel work correctly
+    """
+    response = client.get("/.well-known/webfinger?resource=acct:nikdoof@doofnet.uk&rel=self")
+    assert response.status_code == 200
+
+    assert len(response.json['links'])
+    for link in response.json['links']:
+        assert link['rel'] == 'self'
+
+def test_multiple_rel_filtering(client):
+    """
+    Check that filtering links by mulitple rel work correctly
+    """
+    rels = ['self', 'http://webfinger.net/rel/profile-page']
+    params = {
+        'resource': 'acct:nikdoof@doofnet.uk',
+        'rel': rels,
+    }
+
+    response = client.get("/.well-known/webfinger", query_string=params)
+    assert response.status_code == 200
+
+    assert len(response.json['links']) > 1
+    for link in response.json['links']:
+        assert link['rel'] in rels

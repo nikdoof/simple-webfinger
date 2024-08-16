@@ -48,12 +48,10 @@ def get_account_links(user: str, data: dict) -> list:
     return links
 
 
-def filter_links(links: dict[str, str], rel: str) -> list:
+def filter_links(links: dict[str, str], rel: list[str]) -> list:
     """
     Filter links by rel provided.
     """
-    if isinstance(rel, str):
-        rel = [rel]
     new_links = []
     for link in links:
         if link["rel"] in rel:
@@ -105,7 +103,8 @@ def create_app(config={}):
 
             # If we have a 'rel' value on the request, filter down to the requested rel
             # https://datatracker.ietf.org/doc/html/rfc7033#section-4.3
-            rel = request.args.get("rel")
+            print(request.args)
+            rel = request.args.getlist("rel")
             if rel:
                 links = filter_links(links, rel)
 
