@@ -2,6 +2,8 @@ from urllib.parse import urlparse
 
 import yaml
 from flask import Flask, abort, request
+from prometheus_flask_exporter import PrometheusMetrics
+
 from simple_webfinger.models.webfinger import JSONResourceDefinition
 
 
@@ -62,6 +64,10 @@ def filter_links(links: dict[str, str], rel: list[str]) -> list:
 
 def create_app(config={}):
     app = Flask("simple_webfinger")
+
+    metrics = PrometheusMetrics(app)
+    metrics.info('app_info', 'Application info', version='0.1.0')
+    
     app.webfinger_config = {
         "domain": None,
         "accounts": {},
