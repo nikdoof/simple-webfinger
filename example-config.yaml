@@ -1,9 +1,0 @@
-domain: doofnet.uk
-oidc_href: https://id.doofnet.uk/application/o/tailscale/
-
-accounts:
-  nikdoof:
-    mastodon: nikdoof@mastodon.incognitus.net
-    aliases: []
-    properties: []
-    links: []

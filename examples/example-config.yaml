@@ -1,0 +1,16 @@
+# The domain that this Webfinger instance should respond to, different domains will 404
+domain: doofnet.uk
+
+# The URL to use for OIDC hrefs, this should be the endpoint of your IDP system for the OIDC application
+# Check the documentation for your solution.
+# For Authentik, it'll be the 'OpenID Configuration Issuer' for your Provider
+oidc_href: https://id.doofnet.uk/application/o/tailscale/
+
+# Accounts to return valid responses for.
+accounts:
+  testaccount:  # Extra values do not need to be specified
+  nikdoof:
+    mastodon: nikdoof@mastodon.incognitus.net  # A valid mastodon account will inject the required links for Mastodon to work correctly
+    aliases: []  # Aliases for this WebFinger account: https://datatracker.ietf.org/doc/html/rfc7033#section-4.4.2
+    properties: []  # https://datatracker.ietf.org/doc/html/rfc7033#section-4.4.3
+    links: []  # https://datatracker.ietf.org/doc/html/rfc7033#section-4.4.4
