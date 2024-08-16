@@ -16,7 +16,7 @@ ENV PYTHONFAULTHANDLER=1 \
   POETRY_VERSION=1.7.1
 
 # System deps:
-RUN apk add build-base unzip wget python3-dev libffi-dev rust cargo
+RUN apk add build-base unzip wget python3-dev libffi-dev rust cargo openssl-dev
 RUN pip install "poetry==$POETRY_VERSION"
 
 WORKDIR /src
