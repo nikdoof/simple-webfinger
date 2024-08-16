@@ -30,4 +30,4 @@ FROM base AS runtime
 COPY --from=builder /runtime /usr/local
 COPY . /app
 WORKDIR /app
-CMD ["/usr/local/bin/uvicorn", "simple_webfinger.app:app", "--host", "0.0.0.0", "--port", "80", "--proxy-headers"]
+CMD ["/usr/local/bin/uwsgi", "-w", "simple_webfinger.app:create_app()", "--master", "--http", "0.0.0.0:80"]

@@ -1,75 +1,129 @@
 from urllib.parse import urlparse
 
-from flask import Flask, request, abort
 import yaml
-
-app = Flask(__name__)
-
-with open('config.yaml', 'rb') as fobj:
-    data = yaml.load(fobj, yaml.SafeLoader)
+import json
+from flask import Flask, abort, request
 
 
-def get_account_links(user):
+def get_account_links(user: str, data: dict) -> list:
     links = []
-    account_data = data['accounts'][user]
+    account_data = data["accounts"][user]
 
     # Append custom links
-    if 'links' in account_data:
-        links.extend(account_data['links'])
+    if "links" in account_data:
+        links.extend(account_data["links"])
 
-    if 'mastodon' in account_data:
-        account, domain = account_data['mastodon'].split('@')
-        links.extend([
-            {'rel': 'http://webfinger.net/rel/profile-page', 'type': 'text/html', 'href': 'https://{0}/@{1}'.format(domain, account)},
-            {'rel': 'self', 'type': 'application/activity+json', 'href': 'https://{0}/users/{1}'.format(domain, account)},
-            {'rel': 'http://ostatus.org/schema/1.0/subscribe', 'template': "https://{0}/authorize_interaction?uri={{uri}}".format(domain)}
-        ])
+    if "mastodon" in account_data:
+        account, domain = account_data["mastodon"].split("@")
+        links.extend(
+            [
+                {
+                    "rel": "http://webfinger.net/rel/profile-page",
+                    "type": "text/html",
+                    "href": "https://{0}/@{1}".format(domain, account),
+                },
+                {
+                    "rel": "self",
+                    "type": "application/activity+json",
+                    "href": "https://{0}/users/{1}".format(domain, account),
+                },
+                {
+                    "rel": "http://ostatus.org/schema/1.0/subscribe",
+                    "template": "https://{0}/authorize_interaction?uri={{uri}}".format(
+                        domain
+                    ),
+                },
+            ]
+        )
 
     # Append the OIDC link
-    if 'oidc_href' in data:
-        links.append({
-            'rel': 'http://openid.net/specs/connect/1.0/issuer',
-            'href': data['oidc_href'],
-        })
+    if "oidc_href" in data:
+        links.append(
+            {
+                "rel": "http://openid.net/specs/connect/1.0/issuer",
+                "href": data["oidc_href"],
+            }
+        )
 
     return links
 
 
-def filter_links(links, rel):
+def filter_links(links: dict[str, str], rel: str) -> list:
+    """
+    Filter links by rel provided.
+    """
+    if isinstance(rel, str):
+        rel = [rel]
     new_links = []
     for link in links:
-        if link['rel'] == rel:
+        if link["rel"] in rel:
             new_links.append(link)
     return new_links
 
 
-@app.route("/.well-known/webfinger")
-def webfinger():
-    resource = request.args.get('resource')
+def create_app(config={}):
+    app = Flask("simple_webfinger")
+    app.webfinger_config = {
+        "domain": None,
+        "accounts": {},
+    }
+    app.config.from_prefixed_env("SIMPLE_WEBFINGER")
+    app.config.from_object(config)
 
-    # No resource requested, so return a HTTP 400
-    if not resource:
-        abort(400)
+    if "CONFIG_FILE" in app.config:
+        with open(app.config["CONFIG_FILE"], "rb") as fobj:
+            app.webfinger_config = yaml.load(fobj, yaml.SafeLoader)
 
-    account, domain = urlparse(resource).path.split('@')
+    if not app.webfinger_config["domain"]:
+        app.logger.warning(
+            "No domain is configured for webfinger, this instance will not operate correctly."
+        )
 
-    # If the request is not for the correct domain, or for an account that doesn't exist, return 404
-    if domain != data['domain'] or account not in data['accounts']:
+    @app.route("/.well-known/webfinger")
+    def webfinger():
+        resource = request.args.get("resource")
+
+        # No resource requested, so return a HTTP 400
+        if not resource:
+            abort(400)
+
+        parsed_resource = urlparse(resource)
+        scheme = parsed_resource.scheme
+        account, domain = parsed_resource.path.split("@")
+
+        # If the request is not for the correct domain, return 404
+        if domain != app.webfinger_config["domain"]:
+            abort(404)
+
+        # Handle acct resource requests
+        if scheme == "acct":
+            if account not in app.webfinger_config["accounts"]:
+                abort(404)
+
+            account_data = app.webfinger_config["accounts"][account]
+            links = get_account_links(account, app.webfinger_config)
+
+            # If we have a 'rel' value on the request, filter down to the requested rel
+            # https://datatracker.ietf.org/doc/html/rfc7033#section-4.3
+            rel = request.args.get("rel")
+            if rel:
+                links = filter_links(links, rel)
+
+            response = {"subject": resource, "links": links}
+            if "properties" in account_data and len(account_data['properties']):
+                response.update({"properties": account_data["properties"]})
+
+            return app.response_class(
+                response=json.dumps(response),
+                status=200,
+                mimetype="application/jrd+json",
+            )
+
+        # Anything else, 404 for now
         abort(404)
 
-    links = get_account_links(account)
-
-    # If we have a 'rel' value on the request, filter down to the requested rel
-    # https://datatracker.ietf.org/doc/html/rfc7033#section-4.3
-    rel = request.args.get('rel')
-    if rel:
-        links = filter_links(links, rel)
-
-    return {
-        'subject': resource,
-        'links': links
-    }
+    return app
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+if __name__ == "__main__":
+    create_app().run(host="0.0.0.0", port=8000)
