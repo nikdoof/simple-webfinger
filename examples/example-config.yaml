@@ -8,9 +8,13 @@ oidc_href: https://id.doofnet.uk/application/o/tailscale/
 
 # Accounts to return valid responses for.
 accounts:
-  testaccount:  # Extra values do not need to be specified
+  testaccount: #  Extra values do not need to be specified
   nikdoof:
-    mastodon: nikdoof@mastodon.incognitus.net  # A valid mastodon account will inject the required links for Mastodon to work correctly
+    mastodon: nikdoof@mastodon.incognitus.net # A valid mastodon account will inject the required links for Mastodon to work correctly
     aliases: []  # Aliases for this WebFinger account: https://datatracker.ietf.org/doc/html/rfc7033#section-4.4.2
     properties: []  # https://datatracker.ietf.org/doc/html/rfc7033#section-4.4.3
-    links: []  # https://datatracker.ietf.org/doc/html/rfc7033#section-4.4.4
+    links:  # https://datatracker.ietf.org/doc/html/rfc7033#section-4.4.4
+      - rel: "http://webfinger.net/rel/avatar"
+        href: "https://nikdoof.com/img/avatar-dithered.png"
+      - rel: "http://webfinger.net/rel/profile-page"
+        href: "https://nikdoof.com/"
