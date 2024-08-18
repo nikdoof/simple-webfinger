@@ -56,6 +56,20 @@ def test_invalid_user_request(app, client):
     response = client.get("/.well-known/webfinger?resource=nikdoof@doofnet.uk")
     assert response.status_code == 404
 
+def test_cors_headers(client):
+    # https://datatracker.ietf.org/doc/html/rfc7033#section-5
+    # Access-Control-Allow-Origin: *
+    response = client.get("/.well-known/webfinger?resource=acct:testaccount@doofnet.uk")
+    assert response.status_code == 200
+    assert 'Access-Control-Allow-Origin' in response.headers
+    assert response.headers['Access-Control-Allow-Origin'] == '*'
+
+def test_content_type_response(client):
+    # https://datatracker.ietf.org/doc/html/rfc7033#section-10.2
+    response = client.get("/.well-known/webfinger?resource=acct:testaccount@doofnet.uk")
+    assert response.status_code == 200
+    assert response.headers['Content-Type'] == 'application/jrd+json'
+
 def test_rel_filtering(client):
     """
     Check that filtering links by rel work correctly

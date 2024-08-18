@@ -1,7 +1,7 @@
 from urllib.parse import urlparse
 
 import yaml
-from flask import Flask, abort, request
+from flask import Flask, abort, request, Response
 from prometheus_flask_exporter import PrometheusMetrics
 
 from simple_webfinger.models.webfinger import JSONResourceDefinition
@@ -83,6 +83,11 @@ def create_app(config={}):
         app.logger.warning(
             "No domain is configured for webfinger, this instance will not operate correctly."
         )
+
+    @app.after_request
+    def inject_cors(response: Response) -> Response:
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        return response
 
     @app.route("/.well-known/webfinger")
     def webfinger():
