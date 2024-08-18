@@ -11,7 +11,7 @@ lint: .venv
 	python3 -m poetry run ruff check --output-format=github --target-version=py37 .
 
 serve-uwsgi:
-	SIMPLE_WEBFINGER_CONFIG_FILE="examples/example-config.yaml" python3 -m poetry run uwsgi -w "simple_webfinger.app:create_app()" --master --http 0.0.0.0:8000
+	SIMPLE_WEBFINGER_CONFIG_FILE="examples/example-config.yaml" python3 -m poetry run gunicorn "simple_webfinger.app:create_app()"
 
 serve:
 	DEBUG_METRICS=1 SIMPLE_WEBFINGER_CONFIG_FILE="examples/example-config.yaml" FLASK_DEBUG=1 FLASK_APP="simple_webfinger.app:create_app()" python3 -m poetry run flask run 

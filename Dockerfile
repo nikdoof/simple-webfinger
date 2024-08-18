@@ -31,4 +31,4 @@ COPY --from=builder /runtime /usr/local
 COPY . /app
 WORKDIR /app
 EXPOSE 8000/tcp
-CMD ["/usr/local/bin/gunicorn", "simple_webfinger.app:create_app()"]
+CMD ["/usr/local/bin/gunicorn", "simple_webfinger.app:create_app()", "-b", "0.0.0.0:8000"]
