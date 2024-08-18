@@ -4,9 +4,19 @@ A simple, Flask-based webfinger handler.
 
 Simple Webfinger was created to provide an OIDC href from a basic YAML configuration file. Ideally for use with Tailscale and Authentik.
 
-## Configuration
+## Running the application.
 
-The `example-config.yaml` has the basic layout of the YAML file, which has the following fields. This should be provided as `config.yaml` in the working directory you're running the process.
+`simple_webfinger` is a basic Flask application and can be configured via environment variables. 
+
+| Environment Variable           | Description                         |
+| ------------------------------ | ----------------------------------- |
+| `SIMPLE_WEBFINGER_CONFIG_FILE` | Path to the YAML configuration file |
+
+## Configuration File
+
+The `examples/example-config.yaml` file has the basic layout of the YAML configuratio, The path to the file should be provided in the environment variable  `SIMPLE_WEBFINGER_CONFIG_FILE`.
+
+### Global Values
 
 | Key         | Value Example               | Description                                                   |
 | ----------- | --------------------------- | ------------------------------------------------------------- |
