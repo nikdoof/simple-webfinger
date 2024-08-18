@@ -30,4 +30,5 @@ FROM base AS runtime
 COPY --from=builder /runtime /usr/local
 COPY . /app
 WORKDIR /app
-CMD ["/usr/local/bin/uwsgi", "-w", "simple_webfinger.app:create_app()", "--master", "--http", "0.0.0.0:8000"]
+EXPOSE 8000/tcp
+CMD ["/usr/local/bin/gunicorn", "simple_webfinger.app:create_app()"]
