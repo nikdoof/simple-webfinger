@@ -13,11 +13,11 @@ ENV PYTHONFAULTHANDLER=1 \
   PATH="$PATH:/runtime/bin" \
   PYTHONPATH="$PYTHONPATH:/runtime/lib/python3.12/site-packages" \
   # Versions:
-  POETRY_VERSION=1.8.3
+  POETRY_VERSION=2.1.1
 
 # System deps:
 RUN apk add build-base unzip wget python3-dev libffi-dev rust cargo openssl-dev
-RUN pip install "poetry==$POETRY_VERSION"
+RUN pip install "poetry==$POETRY_VERSION" "poetry-plugin-export"
 
 WORKDIR /src
 
@@ -31,4 +31,4 @@ COPY --from=builder /runtime /usr/local
 COPY . /app
 WORKDIR /app
 EXPOSE 8000/tcp
-CMD ["/usr/local/bin/gunicorn", "simple_webfinger.app:create_app()", "-b", "0.0.0.0:8000"]
+CMD ["/usr/local/bin/gunicorn", "simple_webfinger.app:create_app()", "-b", "0.0.0.0:8000", "--access-logfile", "-"]
