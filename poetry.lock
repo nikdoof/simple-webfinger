@@ -255,19 +255,19 @@ twisted = ["twisted"]
 
 [[package]]
 name = "prometheus-flask-exporter"
-version = "0.23.1"
+version = "0.23.2"
 description = "Prometheus metrics exporter for Flask"
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "prometheus_flask_exporter-0.23.1-py3-none-any.whl", hash = "sha256:ab49b2c40b57cd35cd51e91e59b3c306b3754477095c4f3cf679034c5122398c"},
-    {file = "prometheus_flask_exporter-0.23.1.tar.gz", hash = "sha256:587c770a1061e93d72c5cbcdefbd7b633fb764e39dffd7dd16932c9124559244"},
+    {file = "prometheus_flask_exporter-0.23.2-py3-none-any.whl", hash = "sha256:94922a636d4c1d8b68e1ee605c30a23e9bbb0b21756df8222aa919634871784c"},
+    {file = "prometheus_flask_exporter-0.23.2.tar.gz", hash = "sha256:41fc9bbd7d48cc958ed8384aacf60c3621d9e903768be61c4e7f0c63872eaf1a"},
 ]
 
 [package.dependencies]
 flask = "*"
-prometheus-client = "*"
+prometheus_client = "*"
 
 [[package]]
 name = "pydantic"
