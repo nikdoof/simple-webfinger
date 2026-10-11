@@ -1,7 +1,7 @@
 from urllib.parse import urlparse
 
 import yaml
-from flask import Flask, abort, request, Response
+from flask import Flask, Response, abort, request
 from prometheus_flask_exporter import PrometheusMetrics
 
 from simple_webfinger.models.webfinger import JSONResourceDefinition
@@ -32,18 +32,16 @@ def get_account_links(user: str, data: dict) -> list:
                     {
                         "rel": "http://webfinger.net/rel/profile-page",
                         "type": "text/html",
-                        "href": "https://{0}/@{1}".format(domain, account),
+                        "href": f"https://{domain}/@{account}",
                     },
                     {
                         "rel": "self",
                         "type": "application/activity+json",
-                        "href": "https://{0}/users/{1}".format(domain, account),
+                        "href": f"https://{domain}/users/{account}",
                     },
                     {
                         "rel": "http://ostatus.org/schema/1.0/subscribe",
-                        "template": "https://{0}/authorize_interaction?uri={{uri}}".format(
-                            domain
-                        ),
+                        "template": f"https://{domain}/authorize_interaction?uri={{uri}}",
                     },
                 ]
             )
@@ -62,7 +60,7 @@ def filter_links(links: dict[str, str], rel: list[str]) -> list:
     return new_links
 
 
-def create_app(config={}):
+def create_app(config=None):
     app = Flask("simple_webfinger")
 
     metrics = PrometheusMetrics(app)
@@ -73,7 +71,8 @@ def create_app(config={}):
         "accounts": {},
     }
     app.config.from_prefixed_env("SIMPLE_WEBFINGER")
-    app.config.from_object(config)
+    if config is not None:
+        app.config.from_object(config)
 
     if "CONFIG_FILE" in app.config:
         with open(app.config["CONFIG_FILE"], "rb") as fobj:

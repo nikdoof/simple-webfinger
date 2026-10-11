@@ -1,5 +1,6 @@
 from simple_webfinger.models.webfinger import JSONResourceDefinition
 
+
 def test_index_route(client):
     """
     Check that the index route is 404

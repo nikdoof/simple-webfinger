@@ -7,7 +7,6 @@ from simple_webfinger.app import create_app
 @pytest.fixture(scope="module")
 def app():
     app = create_app()
-    app.webfinger_config = yaml.load(
-        open("examples/example-config.yaml", "r"), yaml.SafeLoader
-    )
+    with open("examples/example-config.yaml", "r") as config_file:
+        app.webfinger_config = yaml.safe_load(config_file)
     yield app

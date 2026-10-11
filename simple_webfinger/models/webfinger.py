@@ -1,5 +1,6 @@
-from pydantic import BaseModel, AnyUrl, FutureDatetime
-from typing import Optional, List, Mapping
+from collections.abc import Mapping
+
+from pydantic import AnyUrl, BaseModel, FutureDatetime
 
 
 class JSONResourceDefinitionLink(BaseModel):
@@ -10,11 +11,11 @@ class JSONResourceDefinitionLink(BaseModel):
     """
 
     rel: str
-    type: Optional[str] = None
-    href: Optional[AnyUrl] = None
-    titles: Optional[Mapping[str, str]] = None
-    properties: Optional[Mapping[str, str]] = None
-    template: Optional[str] = None
+    type: str | None = None
+    href: AnyUrl | None = None
+    titles: Mapping[str, str] | None = None
+    properties: Mapping[str, str] | None = None
+    template: str | None = None
 
 
 class JSONResourceDefinition(BaseModel):
@@ -26,7 +27,7 @@ class JSONResourceDefinition(BaseModel):
     """
 
     subject: str
-    expires: Optional[FutureDatetime] = None
-    aliases: Optional[List[str]] = None
-    properties: Optional[Mapping[str, str]] = None
-    links: Optional[List[JSONResourceDefinitionLink]] = None
+    expires: FutureDatetime | None = None
+    aliases: list[str] | None = None
+    properties: Mapping[str, str] | None = None
+    links: list[JSONResourceDefinitionLink] | None = None

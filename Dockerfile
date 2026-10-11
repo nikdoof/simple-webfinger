@@ -19,7 +19,7 @@ WORKDIR /src
 
 # Generate requirements and install *all* dependencies.
 COPY pyproject.toml uv.lock /src/
-RUN uv export --format requirements-txt --output-file requirements.txt
+RUN uv export --format requirements-txt --no-emit-project --output-file requirements.txt
 RUN pip install --prefix=/runtime --force-reinstall -r requirements.txt
 
 FROM base AS runtime
