@@ -6,8 +6,8 @@ tests: .venv
 	uv run pytest
 
 lint: .venv
-	uv run ruff check --output-format=github --select=E9,F63,F7,F82 --target-version=py311 .
-	uv run ruff check --output-format=github --target-version=py311 .
+	uv run ruff check --output-format=github --select=E9,F63,F7,F82 --target-version=py314 .
+	uv run ruff check --output-format=github --target-version=py314 .
 
 serve-uwsgi:
 	SIMPLE_WEBFINGER_CONFIG_FILE="examples/example-config.yaml" uv run gunicorn "simple_webfinger.app:create_app()"
